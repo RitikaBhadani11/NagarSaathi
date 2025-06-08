@@ -1,17 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 
-const ComplaintForm = () => {
+const ComplaintForm = ({ userName = 'Ritika Bhadani', ward = 'Ward 12', onComplaintSubmit }) => {
   const [previewImage, setPreviewImage] = useState(null);
   const [formData, setFormData] = useState({
     category: "",
     description: "",
-    ward: "",
+    ward: ward,
     image: null,
   });
+  const [complaintsThisWeek, setComplaintsThisWeek] = useState(0);
+  const [maxComplaintsReached, setMaxComplaintsReached] = useState(false);
 
   const categories = ["Waste", "Road Damage", "Water Supply", "Safety", "Others"];
   const wards = Array.from({ length: 20 }, (_, i) => `Ward ${i+1}`);
+
+  useEffect(() => {
+    const storedComplaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    const recentComplaints = storedComplaints.filter(complaint => {
+      return new Date(complaint.date) > oneWeekAgo && complaint.userName === userName;
+    });
+    
+    setComplaintsThisWeek(recentComplaints.length);
+    setMaxComplaintsReached(recentComplaints.length >= 2);
+  }, [userName]);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -27,8 +42,42 @@ const ComplaintForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Submit logic (e.g., to backend)
-    alert("Complaint submitted!");
+    
+    if (maxComplaintsReached) {
+      alert("You've reached your limit of 2 complaints per week. Please wait to submit more.");
+      return;
+    }
+
+    const newComplaint = {
+      id: Date.now(),
+      title: `${formData.category} Complaint`,
+      description: formData.description,
+      status: "Pending",
+      date: new Date().toISOString().split('T')[0],
+      category: formData.category,
+      ward: formData.ward,
+      userName: userName
+    };
+
+    const storedComplaints = JSON.parse(localStorage.getItem('complaints') || '[]');
+    const updatedComplaints = [...storedComplaints, newComplaint];
+    localStorage.setItem('complaints', JSON.stringify(updatedComplaints));
+
+    if (onComplaintSubmit) {
+      onComplaintSubmit(newComplaint);
+    }
+
+    setFormData({
+      category: "",
+      description: "",
+      ward: ward,
+      image: null,
+    });
+    setPreviewImage(null);
+    setComplaintsThisWeek(prev => prev + 1);
+    setMaxComplaintsReached(complaintsThisWeek + 1 >= 2);
+
+    alert("Complaint submitted successfully!");
   };
 
   return (
@@ -37,8 +86,18 @@ const ComplaintForm = () => {
       <div className="container mx-auto px-4 py-24 flex items-center justify-center">
         <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-2xl">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Submit a Complaint</h2>
+          
+          {maxComplaintsReached && (
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">
+              <p>You've reached your limit of 2 complaints this week. You can submit more after {(new Date()).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}.</p>
+            </div>
+          )}
+          
+          <p className="text-center text-gray-600 mb-6">
+            Complaints submitted this week: {complaintsThisWeek}/2
+          </p>
+          
           <form onSubmit={handleSubmit} className="space-y-6">
-            
             {/* Category */}
             <div>
               <label className="block text-gray-700 font-semibold mb-1">Category</label>
@@ -127,7 +186,10 @@ const ComplaintForm = () => {
             <div className="text-center">
               <button
                 type="submit"
-                className="bg-indigo-600 text-white px-6 py-3 rounded-xl text-lg font-semibold hover:bg-indigo-700 transition-all w-full"
+                disabled={maxComplaintsReached}
+                className={`bg-indigo-600 text-white px-6 py-3 rounded-xl text-lg font-semibold hover:bg-indigo-700 transition-all w-full ${
+                  maxComplaintsReached ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 Submit Complaint
               </button>

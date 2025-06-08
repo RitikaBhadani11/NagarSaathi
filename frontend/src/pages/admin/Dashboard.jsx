@@ -159,6 +159,49 @@ const AdminDashboard = () => {
     setWardsData(generateWardsData(updatedComplaints));
   };
 
+  // Function to convert data to CSV
+  const convertToCSV = (data) => {
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map(obj => 
+      Object.values(obj).map(value => 
+        typeof value === 'string' && value.includes(',') ? `"${value}"` : value
+      ).join(',')
+    );
+    return [headers, ...rows].join('\n');
+  };
+
+  // Handle export to CSV
+  const handleExport = () => {
+    // Prepare the data for export
+    const exportData = recentComplaints.map(complaint => ({
+      ID: complaint.id,
+      Ward: complaint.ward,
+      Category: complaint.category,
+      Priority: complaint.priority,
+      Status: complaint.status,
+      'Predicted Resolution (days)': mlInsights.predictedTimes[complaint.id],
+      Date: complaint.date
+    }));
+
+    // Convert to CSV
+    const csvData = convertToCSV(exportData);
+    
+    // Create a download link
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `complaints_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   // Calculate metrics
   const totalComplaints = wardsData.reduce((sum, ward) => sum + ward.complaints, 0);
   const totalResolved = recentComplaints.filter(c => c.status === 'Resolved').length;
@@ -225,11 +268,6 @@ const AdminDashboard = () => {
     ]
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
-
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* Header */}
@@ -243,7 +281,10 @@ const AdminDashboard = () => {
             <FiLogOut className="mr-2" />
             Logout
           </button>
-          <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button 
+            onClick={handleExport}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
             <FiDownload className="mr-2" />
             Export Report
           </button>
@@ -339,7 +380,10 @@ const AdminDashboard = () => {
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-800">Recent Complaints (50)</h2>
-            <button className="text-blue-600 hover:text-blue-800 flex items-center text-sm">
+            <button 
+              onClick={handleExport}
+              className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
+            >
               <FiDownload className="mr-1" /> Export Data
             </button>
           </div>

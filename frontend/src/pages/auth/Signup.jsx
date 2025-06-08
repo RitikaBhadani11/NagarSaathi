@@ -44,6 +44,8 @@ const Signup = () => {
 
       // Save to localStorage
       localStorage.setItem('users', JSON.stringify([...existingUsers, newUser]));
+      // Also save the current user data separately for easy access
+      localStorage.setItem('currentUser', JSON.stringify(newUser));
       
       // Redirect to login page
       navigate('/login', {
@@ -155,25 +157,7 @@ const Signup = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-gray-700 mb-2">Phone Number</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaPhone className="text-gray-400" />
-                </div>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Your phone number"
-                  required
-                  pattern="[0-9]{10}"
-                  title="Please enter a 10-digit phone number"
-                />
-              </div>
-            </div>
+            
 
             <button
               type="submit"

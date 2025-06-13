@@ -33,83 +33,83 @@ const Login = () => {
     setLoading(true);
     setError('');
 
-    setTimeout(() => {
+    try {
+      let response;
       if (credentials.isAdmin) {
-        if (credentials.username === 'Ritika' && credentials.password === 'Ritika@11') {
-          localStorage.setItem('user', JSON.stringify({
-            username: 'Ritika',
-            role: 'admin',
-            authenticated: true
-          }));
-          navigate('/dashboard');
-        } else {
-          setError('Invalid admin credentials');
-        }
+        response = await fetch('http://localhost:5000/api/auth/admin/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username: credentials.username,
+            password: credentials.password
+          })
+        });
       } else {
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const user = users.find(u => 
-          (u.email === credentials.username || u.name === credentials.username) && 
-          u.password === credentials.password
-        );
-
-        if (user) {
-          localStorage.setItem('user', JSON.stringify({
-            ...user,
-            authenticated: true,
-            role: 'user'
-          }));
-          navigate('/home');
-        } else {
-          setError('Invalid username or password');
-        }
+        response = await fetch('http://localhost:5000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: credentials.username,
+            password: credentials.password
+          })
+        });
       }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      // Save user data and token to localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // Redirect based on role
+      if (data.user.role === 'admin') {
+        navigate('/dashboard');
+      } else {
+        navigate('/home');
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
-  const handleGoogleSuccess = (credentialResponse) => {
+  const handleGoogleSuccess = async (credentialResponse) => {
     setLoading(true);
+    setError('');
+
     try {
-      // Decode the JWT token to get user info
-      const base64Url = credentialResponse.credential.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
+      const response = await fetch('http://localhost:5000/api/auth/google/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          tokenId: credentialResponse.credential
+        })
+      });
 
-      const googleUser = JSON.parse(jsonPayload);
-      
-      // Check if user exists in local storage
-      const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      let user = existingUsers.find(u => u.email === googleUser.email);
+      const data = await response.json();
 
-      if (!user) {
-        // Create new user from Google data
-        user = {
-          id: googleUser.sub,
-          name: googleUser.name,
-          email: googleUser.email,
-          password: '', // No password for Google users
-          role: 'user',
-          authenticated: true,
-          createdAt: new Date().toISOString(),
-          ward: '', // User can update this later
-          phone: '' // User can update this later
-        };
-        
-        // Save the new user
-        localStorage.setItem('users', JSON.stringify([...existingUsers, user]));
+      if (!response.ok) {
+        throw new Error(data.error || 'Google login failed');
       }
 
-      // Log the user in
-      localStorage.setItem('user', JSON.stringify({
-        ...user,
-        authenticated: true
-      }));
-      
+      // Save user data and token to localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
       navigate('/home');
-    } catch (error) {
-      setError('Google authentication failed. Please try again.');
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -141,7 +141,7 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-gray-700 mb-2">
-                {credentials.isAdmin ? 'Admin Username' : 'Username or Email'}
+                {credentials.isAdmin ? 'Admin Username' : 'Email'}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -153,7 +153,7 @@ const Login = () => {
                   value={credentials.username}
                   onChange={handleChange}
                   className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-indigo-500"
-                  placeholder={credentials.isAdmin ? 'Enter admin username' : 'Your username or email'}
+                  placeholder={credentials.isAdmin ? 'Enter admin username' : 'Your email'}
                   required
                 />
               </div>
@@ -204,18 +204,18 @@ const Login = () => {
               </div>
 
               <div className="mt-6">
-                 <GoogleOAuthProvider clientId="975353904586-j0e5mnsvg4lcivnptse9cupaaock8p40.apps.googleusercontent.com">
-    <div className="flex justify-center">
-      <GoogleLogin
-        onSuccess={handleGoogleSuccess}
-        onError={handleGoogleError}
-        shape="pill"
-        width="100%"  // This will make it take full width
-        text="continue_with"
-        size="large"  // Optional: makes the button taller
-      />
-    </div>
-  </GoogleOAuthProvider>
+                <GoogleOAuthProvider clientId="975353904586-j0e5mnsvg4lcivnptse9cupaaock8p40.apps.googleusercontent.com">
+                  <div className="flex justify-center">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      shape="pill"
+                      width="100%"
+                      text="continue_with"
+                      size="large"
+                    />
+                  </div>
+                </GoogleOAuthProvider>
               </div>
             </div>
           )}

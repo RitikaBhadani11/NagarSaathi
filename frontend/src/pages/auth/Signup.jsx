@@ -1,4 +1,3 @@
-// src/pages/auth/Signup.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaMapMarkerAlt, FaPhone } from 'react-icons/fa';
@@ -26,37 +25,29 @@ const Signup = () => {
     setError('');
 
     try {
-      // Check if user already exists
-      const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      const userExists = existingUsers.some(user => user.email === formData.email);
-      
-      if (userExists) {
-        throw new Error('User with this email already exists');
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Signup failed');
       }
 
-      // Create new user object
-      const newUser = {
-        ...formData,
-        id: Date.now().toString(),
-        role: 'user',
-        createdAt: new Date().toISOString()
-      };
-
-      // Save to localStorage
-      localStorage.setItem('users', JSON.stringify([...existingUsers, newUser]));
-      // Also save the current user data separately for easy access
-      localStorage.setItem('currentUser', JSON.stringify(newUser));
-      
-      // Redirect to login page
+      // Redirect to login with success message
       navigate('/login', {
         state: { 
           signupSuccess: true,
           email: formData.email 
         }
       });
-      
     } catch (err) {
-      setError(err.message || 'Signup failed. Please try again.');
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -65,13 +56,11 @@ const Signup = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden w-full max-w-md">
-        {/* Header */}
         <div className="bg-indigo-600 py-6 px-8 text-center">
           <h1 className="text-3xl font-bold text-white">Join WardWatch</h1>
           <p className="text-indigo-100 mt-2">Help improve your community</p>
         </div>
 
-        {/* Signup Form */}
         <div className="p-8">
           {error && (
             <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
@@ -157,7 +146,23 @@ const Signup = () => {
               </div>
             </div>
 
-            
+            <div>
+              <label className="block text-gray-700 mb-2">Phone Number</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaPhone className="text-gray-400" />
+                </div>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Your phone number"
+                  required
+                />
+              </div>
+            </div>
 
             <button
               type="submit"

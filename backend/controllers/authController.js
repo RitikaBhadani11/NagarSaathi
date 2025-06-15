@@ -129,7 +129,9 @@ exports.adminLogin = async (req, res, next) => {
     }
 
     // Find admin user in database
-    const adminUser = await User.findOne({ role: 'admin', email: 'admin@wardwatch.com' });
+    // Fix for adminLogin
+const adminUser = await User.findOne({ role: 'admin', email: 'admin@wardwatch.com' }).select('+password');
+
 
     if (!adminUser) {
       // Create admin user if not exists (first time)

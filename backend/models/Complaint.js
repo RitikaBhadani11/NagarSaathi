@@ -1,3 +1,4 @@
+// models/Complaint.js
 const mongoose = require("mongoose")
 
 const complaintSchema = new mongoose.Schema({
@@ -7,10 +8,20 @@ const complaintSchema = new mongoose.Schema({
     maxlength: [100, "Title cannot exceed 100 characters"],
   },
   ward: {
-  type: String,
-  required: true
-},
-
+    type: String,
+    required: function() {
+      // Only require ward for public complaints
+      return this.isPublic;
+    }
+  },
+  name: {
+    type: String,
+    required: function() {
+      // Only require name for public complaints
+      return this.isPublic;
+    },
+    maxlength: [100, "Name cannot exceed 100 characters"],
+  },
   description: {
     type: String,
     required: [true, "Please provide a complaint description"],
@@ -41,7 +52,10 @@ const complaintSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    required: true,
+    // Not required for public complaints
+    required: function() {
+      return !this.isPublic;
+    }
   },
   createdAt: {
     type: Date,
@@ -50,7 +64,10 @@ const complaintSchema = new mongoose.Schema({
   resolvedAt: {
     type: Date,
   },
+  isPublic: {
+    type: Boolean,
+    default: false
+  }
 })
 
 module.exports = mongoose.model("Complaint", complaintSchema)
-

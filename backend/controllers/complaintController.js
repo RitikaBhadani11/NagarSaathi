@@ -206,7 +206,38 @@ exports.getComplaintsByWard = async (req, res) => {
     })
   }
 }
+exports.createPublicComplaint = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
+    const { title, description, category, location, priority } = req.body;
+
+    const complaintData = {
+      title,
+      description,
+      category,
+      location,
+      priority: priority || "Medium",
+      isPublic: true,
+      status: "Pending"
+    };
+
+    const complaint = await Complaint.create(complaintData);
+
+    res.status(201).json({
+      success: true,
+      complaint,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
 
 // Export multer upload middleware
 exports.uploadImage = upload.single("image");

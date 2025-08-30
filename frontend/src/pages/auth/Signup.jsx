@@ -39,11 +39,10 @@ const Signup = () => {
         throw new Error(data.error || 'Signup failed');
       }
 
-      // Redirect to login with success message
       navigate('/login', {
-        state: { 
+        state: {
           signupSuccess: true,
-          email: formData.email 
+          email: formData.email
         }
       });
     } catch (err) {
@@ -69,6 +68,7 @@ const Signup = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Full Name */}
             <div>
               <label className="block text-gray-700 mb-2">Full Name</label>
               <div className="relative">
@@ -88,6 +88,7 @@ const Signup = () => {
               </div>
             </div>
 
+            {/* Email */}
             <div>
               <label className="block text-gray-700 mb-2">Email</label>
               <div className="relative">
@@ -106,6 +107,7 @@ const Signup = () => {
               </div>
             </div>
 
+            {/* Password */}
             <div>
               <label className="block text-gray-700 mb-2">Password</label>
               <div className="relative">
@@ -125,6 +127,7 @@ const Signup = () => {
               </div>
             </div>
 
+            {/* Ward */}
             <div>
               <label className="block text-gray-700 mb-2">Ward Number</label>
               <div className="relative">
@@ -140,12 +143,13 @@ const Signup = () => {
                 >
                   <option value="">Select your ward</option>
                   {Array.from({ length: 20 }, (_, i) => (
-                    <option key={i+1} value={`Ward ${i+1}`}>Ward {i+1}</option>
+                    <option key={i + 1} value={`Ward ${i + 1}`}>Ward {i + 1}</option>
                   ))}
                 </select>
               </div>
             </div>
 
+            {/* Phone */}
             <div>
               <label className="block text-gray-700 mb-2">Phone Number</label>
               <div className="relative">
@@ -164,25 +168,25 @@ const Signup = () => {
               </div>
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg transition duration-200 font-medium ${
-                loading ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'
-              } text-white`}
+              className={`w-full py-3 px-4 rounded-lg transition duration-200 font-medium ${loading ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'
+                } text-white`}
             >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating account...
-                </span>
-              ) : 'Sign Up'}
+              {loading ? 'Creating account...' : 'Sign Up'}
             </button>
           </form>
 
+          <button
+            onClick={() => navigate('/generate-qr')}
+            className="mt-2 py-2 px-4 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Scan QR to File Complaint
+          </button>
+
+          {/* Already have account */}
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Already have an account?{' '}
@@ -194,9 +198,12 @@ const Signup = () => {
               </button>
             </p>
           </div>
+
+
         </div>
       </div>
     </div>
+
   );
 };
 

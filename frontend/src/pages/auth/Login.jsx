@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { FaUser, FaLock, FaHashtag } from "react-icons/fa"
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google"
-import toast from "react-hot-toast"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaUser, FaLock, FaHashtag } from "react-icons/fa";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -12,16 +12,16 @@ const Login = () => {
     password: "",
     wardNumber: "",
     loginType: "user",
-  })
+  });
 
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setCredentials((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setCredentials((prev) => ({ ...prev, [name]: value }));
+  };
 
   const toggleLoginType = (type) => {
     setCredentials({
@@ -29,17 +29,17 @@ const Login = () => {
       password: "",
       wardNumber: "",
       loginType: type,
-    })
-    setError("")
-  }
+    });
+    setError("");
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
-      let response
+      let response;
 
       if (credentials.loginType === "admin") {
         response = await fetch("http://localhost:5000/api/auth/admin/login", {
@@ -49,7 +49,7 @@ const Login = () => {
             username: credentials.username,
             password: credentials.password,
           }),
-        })
+        });
       } else if (credentials.loginType === "wardAdmin") {
         response = await fetch("http://localhost:5000/api/auth/wardadmin/login", {
           method: "POST",
@@ -57,9 +57,9 @@ const Login = () => {
           body: JSON.stringify({
             username: credentials.username,
             password: credentials.password,
-            wardNumber: String(credentials.wardNumber), // ✅ ensure string type
+            wardNumber: String(credentials.wardNumber),
           }),
-        })
+        });
       } else {
         response = await fetch("http://localhost:5000/api/auth/login", {
           method: "POST",
@@ -68,74 +68,75 @@ const Login = () => {
             email: credentials.username,
             password: credentials.password,
           }),
-        })
+        });
       }
 
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || "Login failed")
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Login failed");
 
-      localStorage.setItem("token", data.token)
-      localStorage.setItem("user", JSON.stringify(data.user))
-      toast.success(`Welcome back, ${data.user.name || "User"}!`)
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      toast.success(`Welcome back, ${data.user.name || "User"}!`);
 
-      if (data.user.role === "admin") navigate("/dashboard")
-      else if (data.user.role === "wardAdmin") navigate("/ward-dashboard")
-      else navigate("/home")
+      if (data.user.role === "admin") navigate("/dashboard");
+      else if (data.user.role === "wardAdmin") navigate("/ward-dashboard");
+      else navigate("/home");
     } catch (err) {
-      setError(err.message)
-      toast.error(err.message)
+      setError(err.message);
+      toast.error(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    setLoading(true)
-    setError("")
+    setLoading(true);
+    setError("");
     try {
       const response = await fetch("http://localhost:5000/api/auth/google/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tokenId: credentialResponse.credential }),
-      })
+      });
 
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || "Google login failed")
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Google login failed");
 
-      localStorage.setItem("token", data.token)
-      localStorage.setItem("user", JSON.stringify(data.user))
-      toast.success(`Welcome, ${data.user.name || "User"}!`)
-      navigate("/home")
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      toast.success(`Welcome, ${data.user.name || "User"}!`);
+      navigate("/home");
     } catch (err) {
-      setError(err.message)
-      toast.error(err.message)
+      setError(err.message);
+      toast.error(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleGoogleError = () => {
-    setError("Google authentication failed. Please try again.")
-    toast.error("Google authentication failed")
-  }
+    setError("Google authentication failed. Please try again.");
+    toast.error("Google authentication failed");
+  };
 
   const getLoginHeading = () => {
-    if (credentials.loginType === "admin") return "Main Admin Login"
-    if (credentials.loginType === "wardAdmin") return "Ward Admin Login"
-    return "User Login"
-  }
+    if (credentials.loginType === "admin") return "Main Admin Login";
+    if (credentials.loginType === "wardAdmin") return "Ward Admin Login";
+    return "User Login";
+  };
 
   const getLoginSubtitle = () => {
-    if (credentials.loginType === "admin") return "Restricted Area"
-    if (credentials.loginType === "wardAdmin") return "Manage complaints in your ward"
-    return "Welcome back to NagarSaathi"
-  }
+    if (credentials.loginType === "admin") return "Restricted Area";
+    if (credentials.loginType === "wardAdmin") return "Manage complaints in your ward";
+    return "Welcome back to NagarSaathi";
+  };
 
-  const loginColor = credentials.loginType === "admin"
-    ? "bg-red-600"
-    : credentials.loginType === "wardAdmin"
-    ? "bg-green-600"
-    : "bg-indigo-600"
+  const loginColor =
+    credentials.loginType === "admin"
+      ? "bg-red-600"
+      : credentials.loginType === "wardAdmin"
+      ? "bg-green-600"
+      : "bg-indigo-600";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-200 flex items-center justify-center p-4">
@@ -293,7 +294,7 @@ const Login = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

@@ -1,85 +1,79 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { Star } from "lucide-react"
-import Navbar from "../../components/Navbar"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Star } from "lucide-react";
+import Navbar from "../../components/Navbar";
 
 const Feedback = () => {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
     rating: 0,
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitSuccess, setSubmitSuccess] = useState(false)
-  const navigate = useNavigate()
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
+    const userData = localStorage.getItem("user");
     if (userData) {
-      const parsedUser = JSON.parse(userData)
-      setUser(parsedUser)
-      // Pre-fill form with user data
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
       setFormData((prev) => ({
         ...prev,
         name: parsedUser.name || "",
         email: parsedUser.email || "",
-      }))
+      }));
     } else {
-      navigate("/login")
+      navigate("/login");
     }
-  }, [navigate])
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
-    }))
-  }
+    }));
+  };
 
   const handleRating = (val) => {
-    setFormData((prev) => ({ ...prev, rating: val }))
-  }
+    setFormData((prev) => ({ ...prev, rating: val }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      // Here you would typically send to your backend
-      // For now, we'll simulate the API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      setSubmitSuccess(true)
+      setSubmitSuccess(true);
       setFormData((prev) => ({
         ...prev,
         message: "",
         rating: 0,
-      }))
+      }));
 
-      // Reset success message after 3 seconds
-      setTimeout(() => setSubmitSuccess(false), 3000)
+      setTimeout(() => setSubmitSuccess(false), 3000);
     } catch (error) {
-      alert("Error submitting feedback: " + error.message)
+      alert("Error submitting feedback: " + error.message);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
-  if (!user) {
-    return <div>Loading...</div>
-  }
+  if (!user) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100">
       <Navbar />
-
       <div className="container mx-auto px-4 py-24 flex justify-center items-center">
         <div className="w-full max-w-2xl bg-white p-8 md:p-10 rounded-3xl shadow-xl">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">We Value Your Feedback</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">
+            We Value Your Feedback
+          </h2>
 
           {submitSuccess && (
             <div className="mb-6 p-4 bg-green-100 text-green-700 rounded-lg text-center">
@@ -135,7 +129,12 @@ const Feedback = () => {
               <label className="block text-gray-700 font-medium mb-2">Rating</label>
               <div className="flex items-center gap-2">
                 {[1, 2, 3, 4, 5].map((val) => (
-                  <button type="button" key={val} onClick={() => handleRating(val)} className="focus:outline-none">
+                  <button
+                    type="button"
+                    key={val}
+                    onClick={() => handleRating(val)}
+                    className="focus:outline-none"
+                  >
                     <Star
                       size={32}
                       className={`transition ${
@@ -152,13 +151,15 @@ const Feedback = () => {
               </div>
             </div>
 
-            {/* Submit */}
+            {/* Submit Button */}
             <div className="pt-4">
               <button
                 type="submit"
                 disabled={isSubmitting || formData.rating === 0}
                 className={`w-full py-3 px-6 rounded-xl text-lg font-semibold transition-all flex items-center justify-center ${
-                  isSubmitting ? "bg-orange-400 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600 text-white"
+                  isSubmitting
+                    ? "bg-orange-400 cursor-not-allowed"
+                    : "bg-orange-500 hover:bg-orange-600 text-white"
                 }`}
               >
                 {isSubmitting ? (
@@ -194,7 +195,7 @@ const Feedback = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Feedback
+export default Feedback;

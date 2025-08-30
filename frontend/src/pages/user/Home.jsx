@@ -1,59 +1,65 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { FaQuoteLeft, FaHandsHelping, FaRecycle, FaUsers, FaChartLine, FaExclamationTriangle } from "react-icons/fa"
-import { GiTreeGrowth } from "react-icons/gi"
-import Navbar from "../../components/Navbar"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FaQuoteLeft,
+  FaHandsHelping,
+  FaRecycle,
+  FaUsers,
+  FaChartLine,
+  FaExclamationTriangle,
+} from "react-icons/fa";
+import { GiTreeGrowth } from "react-icons/gi";
+import Navbar from "../../components/Navbar";
 
 const Home = () => {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null);
   const [stats, setStats] = useState({
     totalComplaints: 0,
     resolvedComplaints: 0,
     pendingComplaints: 0,
     recentComplaints: [],
-  })
-  const [loading, setLoading] = useState(true)
+  });
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Get user from localStorage
-    const userData = localStorage.getItem("user")
+    const userData = localStorage.getItem("user");
     if (userData) {
-      setUser(JSON.parse(userData))
-      fetchUserStats()
+      setUser(JSON.parse(userData));
+      fetchUserStats();
+    } else {
+      navigate("/login");
     }
-  }, [])
+  }, [navigate]);
 
   const fetchUserStats = async () => {
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:5000/api/complaints/my", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        const complaints = data.complaints || []
+        const data = await response.json();
+        const complaints = data.complaints || [];
 
         setStats({
           totalComplaints: complaints.length,
           resolvedComplaints: complaints.filter((c) => c.status === "Resolved").length,
           pendingComplaints: complaints.filter((c) => c.status === "Pending").length,
           recentComplaints: complaints.slice(0, 3),
-        })
+        });
       }
     } catch (error) {
-      console.error("Error fetching stats:", error)
+      console.error("Error fetching stats:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  if (!user) {
-    return <div>Loading...</div>
-  }
+  if (!user) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
@@ -70,8 +76,12 @@ const Home = () => {
                 </span>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-800">Welcome back, {user.name}!</h1>
-                <p className="text-gray-600 mt-1">{user.ward} • Making your community better together</p>
+                <h1 className="text-3xl font-bold text-gray-800">
+                  Welcome back, {user.name}!
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  {user.ward} • Making your community better together
+                </p>
               </div>
             </div>
           </div>
@@ -87,7 +97,6 @@ const Home = () => {
                 <FaChartLine className="h-8 w-8 text-blue-500" />
               </div>
             </div>
-
             <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -97,7 +106,6 @@ const Home = () => {
                 <FaUsers className="h-8 w-8 text-green-500" />
               </div>
             </div>
-
             <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -119,7 +127,10 @@ const Home = () => {
             ) : (
               <div className="space-y-3">
                 {stats.recentComplaints.map((complaint) => (
-                  <div key={complaint._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={complaint._id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
                     <div>
                       <p className="font-medium text-gray-800">{complaint.title}</p>
                       <p className="text-sm text-gray-600">
@@ -131,10 +142,10 @@ const Home = () => {
                         complaint.status === "Resolved"
                           ? "bg-green-100 text-green-800"
                           : complaint.status === "In Progress"
-                            ? "bg-blue-100 text-blue-800"
-                            : complaint.status === "Pending"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
+                          ? "bg-blue-100 text-blue-800"
+                          : complaint.status === "Pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
                       }`}
                     >
                       {complaint.status}
@@ -150,13 +161,15 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative h-96 overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2070&q=80"
           alt="Clean neighborhood"
           className="w-full h-full object-cover brightness-75"
         />
         <div className="absolute inset-0 flex items-center justify-center text-center px-4">
           <div className="text-white max-w-4xl">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-shadow-lg">Together for a Cleaner Tomorrow</h1>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-shadow-lg">
+              Together for a Cleaner Tomorrow
+            </h1>
             <p className="text-xl md:text-2xl italic font-light">
               "Keeping our surroundings clean is not an option - it's our responsibility"
             </p>
@@ -164,7 +177,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Mission Section */}
+      {/* Mission & Vision */}
       <section className="py-16 px-4 max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-green-700 mb-4">Our Mission & Vision</h2>
@@ -200,32 +213,33 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-xl shadow-lg">
-            <div className="space-y-6">
-              <div className="flex items-start">
-                <FaQuoteLeft className="text-yellow-400 text-2xl mr-4 mt-1" />
+          {/* Inspirational Quotes */}
+          <div className="bg-white p-8 rounded-xl shadow-lg space-y-6">
+            {[
+              {
+                quote: "We won't have a society if we destroy the environment.",
+                author: "Margaret Mead",
+                color: "yellow-400",
+              },
+              {
+                quote: "Cleanliness is next to godliness.",
+                author: "John Wesley",
+                color: "green-400",
+              },
+              {
+                quote: "The environment is where we all meet; where all have a mutual interest.",
+                author: "Lady Bird Johnson",
+                color: "blue-400",
+              },
+            ].map(({ quote, author, color }, i) => (
+              <div className="flex items-start" key={i}>
+                <FaQuoteLeft className={`text-${color} text-2xl mr-4 mt-1`} />
                 <p className="text-lg italic text-gray-700">
-                  "We won't have a society if we destroy the environment."
-                  <span className="block font-medium mt-2">- Margaret Mead</span>
+                  "{quote}"
+                  <span className="block font-medium mt-2">- {author}</span>
                 </p>
               </div>
-
-              <div className="flex items-start">
-                <FaQuoteLeft className="text-green-400 text-2xl mr-4 mt-1" />
-                <p className="text-lg italic text-gray-700">
-                  "Cleanliness is next to godliness."
-                  <span className="block font-medium mt-2">- John Wesley</span>
-                </p>
-              </div>
-
-              <div className="flex items-start">
-                <FaQuoteLeft className="text-blue-400 text-2xl mr-4 mt-1" />
-                <p className="text-lg italic text-gray-700">
-                  "The environment is where we all meet; where all have a mutual interest."
-                  <span className="block font-medium mt-2">- Lady Bird Johnson</span>
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -234,7 +248,6 @@ const Home = () => {
       <section className="py-16 bg-blue-600 text-white">
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Our Core Values</h2>
-
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
@@ -252,18 +265,34 @@ const Home = () => {
                 title: "Responsibility",
                 desc: "Encouraging personal accountability for shared spaces",
               },
-            ].map((value, index) => (
-              <div key={index} className="text-center p-6 bg-blue-700 rounded-xl hover:bg-blue-800 transition-colors">
-                <div className="flex justify-center">{value.icon}</div>
-                <h3 className="text-xl font-bold mb-2">{value.title}</h3>
-                <p>{value.desc}</p>
+            ].map((val, idx) => (
+              <div
+                key={idx}
+                className="text-center p-6 bg-blue-700 rounded-xl hover:bg-blue-800 transition-colors"
+              >
+                <div className="flex justify-center">{val.icon}</div>
+                <h3 className="text-xl font-bold mb-2">{val.title}</h3>
+                <p>{val.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
-    </div>
-  )
-}
 
-export default Home
+      {/* Call to Action */}
+      <section className="py-16 px-4 text-center">
+        <div className="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Join the Movement</h2>
+          <p className="text-gray-600 mb-6">
+            Be part of the solution! Report issues in your neighborhood and help us create cleaner, safer communities.
+          </p>
+          <button className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-3 rounded-full font-bold hover:opacity-90 transition-opacity">
+            Get Started Today
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Home;

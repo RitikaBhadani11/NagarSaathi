@@ -41,6 +41,7 @@ router.post(
   ],
   adminLogin
 );
+
 router.post(
   '/wardadmin/login',
   [

@@ -7,9 +7,13 @@ import ComplaintForm from './pages/user/ComplaintForm';
 import Home from './pages/user/Home';
 import Mycomplaint from './pages/user/MyComplaint';
 import DiscussionForum from './pages/user/DiscussionForum';
-import WardAdminDashboard from "./pages/subAdmin/WardAdminDashboard"
+import WardAdminDashboard from "./pages/subAdmin/WardAdminDashboard";
 // Admin components
 import AdminDashboard from './pages/admin/Dashboard';
+import QRScanner from './components/QRScanner';
+import QRGenerator from './components/QRGenerator';
+import PublicComplaintForm from './components/PublicComplaintForm';
+
 
 function App() {
   return (
@@ -32,12 +36,15 @@ function App() {
 
         {/* Admin routes - nested under AdminLayout */}
         <Route path="/dashboard" element={<AdminDashboard />} />
-        <Route path="/ward-dashboard" element={<WardAdminDashboard />} />
         
+          <Route path="/ward-dashboard" element={<WardAdminDashboard />} />
 
         {/* Redirects */}
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="/qr-scan" element={<QRScanner />} />
+         <Route path="/generate-qr" element={<QRGenerator />} />
+         <Route path="/public-complaint" element={<PublicComplaintForm />} />
       </Routes>
     </Router>
   );

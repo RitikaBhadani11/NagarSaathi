@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin', 'wardAdmin'],
+    enum: ['user', 'admin'],
     default: 'user'
   },
   googleId: {
@@ -48,15 +48,16 @@ const userSchema = new mongoose.Schema({
 });
 
 // Encrypt password before saving
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   const isAlreadyHashed = this.password.startsWith('$2a$') || this.password.startsWith('$2b$');
-  if (isAlreadyHashed) return next(); // Skip if already hashed
+  if (isAlreadyHashed) return next();
 
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
+
 
 
 // Compare password

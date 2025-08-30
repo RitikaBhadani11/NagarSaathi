@@ -1,6 +1,3 @@
-
-
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -46,13 +43,10 @@ const ComplaintForm = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
-      // Check file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
         setError("Image size should be less than 5MB")
         return
       }
-
-      // Check file type
       if (!file.type.startsWith("image/")) {
         setError("Please select a valid image file")
         return
@@ -133,11 +127,12 @@ const ComplaintForm = () => {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">{error}</div>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+              {error}
+            </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Title */}
             <div>
               <label className="block text-gray-700 font-semibold mb-1">Complaint Title</label>
               <input
@@ -152,7 +147,6 @@ const ComplaintForm = () => {
               />
             </div>
 
-            {/* Category */}
             <div>
               <label className="block text-gray-700 font-semibold mb-1">Category</label>
               <select
@@ -171,7 +165,6 @@ const ComplaintForm = () => {
               </select>
             </div>
 
-            {/* Location */}
             <div>
               <label className="block text-gray-700 font-semibold mb-1">Location</label>
               <input
@@ -185,7 +178,6 @@ const ComplaintForm = () => {
               />
             </div>
 
-            {/* Priority */}
             <div>
               <label className="block text-gray-700 font-semibold mb-1">Priority Level</label>
               <select
@@ -202,7 +194,6 @@ const ComplaintForm = () => {
               </select>
             </div>
 
-            {/* Description */}
             <div>
               <label className="block text-gray-700 font-semibold mb-1">Description</label>
               <textarea
@@ -218,7 +209,6 @@ const ComplaintForm = () => {
               <p className="text-sm text-gray-500 mt-1">{formData.description.length}/500 characters</p>
             </div>
 
-            {/* Image Upload */}
             <div>
               <label className="block text-gray-700 font-semibold mb-1">Upload Image (optional)</label>
               <input
@@ -230,14 +220,13 @@ const ComplaintForm = () => {
                   file:rounded-xl file:border-0
                   file:text-sm file:font-semibold
                   file:bg-indigo-100 file:text-indigo-700
-                  hover:file:bg-indigo-200
-                "
+                  hover:file:bg-indigo-200"
               />
               <p className="text-xs text-gray-500 mt-1">Maximum file size: 5MB</p>
               {previewImage && (
                 <div className="mt-4">
                   <img
-                    src={previewImage || "/placeholder.svg"}
+                    src={previewImage}
                     alt="Preview"
                     className="w-full max-w-xs h-auto rounded-lg shadow-md border"
                   />
@@ -255,7 +244,6 @@ const ComplaintForm = () => {
               )}
             </div>
 
-            {/* Submit */}
             <div className="text-center">
               <button
                 type="submit"

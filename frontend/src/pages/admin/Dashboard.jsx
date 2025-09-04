@@ -116,16 +116,16 @@ const AdminDashboard = () => {
 
   const handleExport = () => {
     const exportData = complaints.map((c) => ({
-      ID: c._id,
-      Title: c.title,
-      Category: c.category,
-      Status: c.status,
-      Priority: c.priority,
-      Location: c.location,
-      "User Name": c.user.name,
-      "User Ward": c.user.ward,
-      "Date Filed": new Date(c.createdAt).toLocaleDateString(),
-    }));
+  ID: c._id,
+  Title: c.title,
+  Category: c.category,
+  Status: c.status,
+  Priority: c.priority,
+  Location: c.location,
+  "User Name": c.user ? c.user.name : c.name || "N/A", // Use the `name` field for public complaints
+  "User Ward": c.user ? c.user.ward : c.ward || "N/A", // Use the `ward` field for public complaints
+  "Date Filed": new Date(c.createdAt).toLocaleDateString(),
+}));
 
     const headers = Object.keys(exportData[0] || {}).join(",");
     const rows = exportData.map((obj) =>
@@ -187,8 +187,7 @@ const AdminDashboard = () => {
   const filteredComplaints = complaints.filter((c) => {
     const matchesSearch =
       c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.user.name.toLowerCase().includes(searchQuery.toLowerCase());
-
+      (c.user?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus ? c.status === filterStatus : true;
     const matchesCategory = filterCategory ? c.category === filterCategory : true;
     const matchesWard = filterWard ? c.user.ward === filterWard : true;

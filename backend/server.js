@@ -9,7 +9,6 @@ const fs = require("fs");
 const multer = require("multer"); // For file upload errors
 const connectDB = require("./config/db");
 
-
 // Load env vars
 dotenv.config({ path: "./.env" });
 

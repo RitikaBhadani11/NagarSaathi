@@ -69,6 +69,52 @@ exports.createComplaint = async (req, res) => {
     });
   }
 };
+// @desc    Create public complaint (no auth required)
+// @route   POST /api/complaints/public
+// @access  Public
+exports.createPublicComplaint = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { title, description, category, location, priority, name, ward, email, phone } = req.body;
+
+    const complaintData = {
+      title,
+      description,
+      category,
+      location,
+      ward,
+      priority: priority || "Medium",
+      isPublic: true,
+      submittedBy: name,
+      publicEmail: email || "",
+      publicPhone: phone || "",
+      status: "Pending"
+    };
+
+    const complaint = await Complaint.create(complaintData);
+
+    res.status(201).json({
+      success: true,
+      message: "Complaint submitted successfully!",
+      complaint: {
+        _id: complaint._id,
+        title: complaint.title,
+        status: complaint.status,
+        referenceId: complaint._id // For user reference
+      }
+    });
+  } catch (error) {
+    console.error("Public complaint error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Server error: " + error.message
+    });
+  }
+};
 
 // @desc    Get all complaints for logged in user
 // @route   GET /api/complaints/my
@@ -131,11 +177,26 @@ exports.deleteComplaint = async (req, res) => {
 // @desc    Get all complaints (Admin only)
 // @route   GET /api/complaints
 // @access  Private/Admin
+// In complaintController.js
 exports.getAllComplaints = async (req, res) => {
   try {
+    console.log("Fetching all complaints with user population...");
+    
     const complaints = await Complaint.find()
-      .populate("user", "name email ward")
+      .populate("user", "name email ward phone")
       .sort({ createdAt: -1 });
+
+    console.log(`Found ${complaints.length} complaints`);
+    
+    // Debug: Check if user data is populated
+    complaints.forEach((complaint, index) => {
+      console.log(`Complaint ${index + 1}:`, {
+        title: complaint.title,
+        userId: complaint.user?._id,
+        userName: complaint.user?.name,
+        userWard: complaint.user?.ward
+      });
+    });
 
     res.status(200).json({
       success: true,
@@ -143,6 +204,7 @@ exports.getAllComplaints = async (req, res) => {
       complaints,
     });
   } catch (error) {
+    console.error("Error in getAllComplaints:", error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -182,64 +244,31 @@ exports.updateComplaintStatus = async (req, res) => {
 // @access  Private
 exports.getComplaintsByWard = async (req, res) => {
   try {
-    const { wardNumber } = req.params
+    const { wardNumber } = req.params;
 
-    // Get complaints with populated user info
+    // Direct query with proper population
     const complaints = await Complaint.find()
-      .populate("user", "name ward")
-      .sort({ createdAt: -1 })
+      .populate({
+        path: 'user',
+        select: 'name ward',
+        match: { ward: new RegExp(`ward ${wardNumber}`, 'i') } // Case-insensitive match
+      })
+      .sort({ createdAt: -1 });
 
-    // Normalize both sides to lowercase and remove extra spacing
-    const filtered = complaints.filter(
-      c => c.user.ward?.toLowerCase().trim() === `ward ${wardNumber}`.toLowerCase().trim()
-    )
+    // Filter out complaints where user is null (no match)
+    const filteredComplaints = complaints.filter(c => c.user !== null);
 
     res.status(200).json({
       success: true,
-      count: filtered.length,
-      complaints: filtered,
-    })
+      count: filteredComplaints.length,
+      complaints: filteredComplaints,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message,
-    })
+    });
   }
-}
-// This is the correct version of your controller function
-exports.createPublicComplaint = async (req, res) => {
-  try {
-   const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { title, description, category, location, priority, name, ward } = req.body;
-
-    const complaintData = {
-      title,
-      description,
-      category,
-      location,
-      name,
-      ward,
-      priority: priority || "Medium",
-      isPublic: true,
-      status: "Pending"
-    };
-
-    const complaint = await Complaint.create(complaintData);
-
-    res.status(201).json({
-      success: true,
-      complaint,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
-  }
 };
 
 // Export multer upload middleware

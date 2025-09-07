@@ -1,6 +1,4 @@
-// models/Complaint.js
-const mongoose = require("mongoose")
-
+const mongoose = require('mongoose');
 const complaintSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -9,18 +7,7 @@ const complaintSchema = new mongoose.Schema({
   },
   ward: {
     type: String,
-    required: function() {
-      // Only require ward for public complaints
-      return this.isPublic;
-    }
-  },
-  name: {
-    type: String,
-    required: function() {
-      // Only require name for public complaints
-      return this.isPublic;
-    },
-    maxlength: [100, "Name cannot exceed 100 characters"],
+    required: true
   },
   description: {
     type: String,
@@ -47,16 +34,32 @@ const complaintSchema = new mongoose.Schema({
     default: "Medium",
   },
   image: {
-    type: String, // File path for uploaded image
+    type: String,
   },
   user: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    // Not required for public complaints
-    required: function() {
-      return !this.isPublic;
-    }
+    // Remove required: true for public complaints
   },
+  
+  // ✅ ADD THESE FIELDS FOR PUBLIC COMPLAINTS
+  isPublic: {
+    type: Boolean,
+    default: false
+  },
+  submittedBy: {
+    type: String, // Store name for public submissions
+    default: ""
+  },
+  publicEmail: {
+    type: String, // Optional: store email for public submissions
+    default: ""
+  },
+  publicPhone: {
+    type: String, // Optional: store phone for public submissions
+    default: ""
+  },
+  
   createdAt: {
     type: Date,
     default: Date.now,
@@ -64,10 +67,6 @@ const complaintSchema = new mongoose.Schema({
   resolvedAt: {
     type: Date,
   },
-  isPublic: {
-    type: Boolean,
-    default: false
-  }
 })
 
 module.exports = mongoose.model("Complaint", complaintSchema)

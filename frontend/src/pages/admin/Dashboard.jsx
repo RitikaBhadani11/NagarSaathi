@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,6 +8,9 @@ import {
   FiUsers,
   FiLogOut,
   FiAlertTriangle,
+  FiMessageSquare,
+  FiX,
+  FiSend,
 } from "react-icons/fi";
 import {
   PieChart,
@@ -26,6 +27,216 @@ import {
 } from "recharts";
 
 const COLORS = ["#FBBF24", "#3B82F6", "#10B981", "#EF4444"];
+
+// Chatbot component
+const AIChatBot = ({ stats, categoryData, complaints }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      text: "Hello! I'm your Nagarsaathi assistant. How can I help you with complaint management today?",
+      sender: "bot",
+      timestamp: new Date(),
+    },
+  ]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getAIResponse = async (message) => {
+    setIsLoading(true);
+
+    try {
+      // In a real implementation, you would call your backend API
+      const response = await fetch('http://localhost:5000/api/chatbot/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: message,
+          context: {
+            stats: stats,
+            categoryData: categoryData,
+            complaints: complaints
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('API response error');
+      }
+
+      const data = await response.json();
+      return data.reply;
+    } catch (error) {
+      console.error('Error calling AI API:', error);
+      const lowerMessage = message.toLowerCase();
+      if (lowerMessage.includes('total') && lowerMessage.includes('complaint')) {
+        return `There are ${stats.total} total complaints in the system.`;
+      } else if (lowerMessage.includes('pending')) {
+        return `Currently, ${stats.pending} complaints are pending review.`;
+      } else if (lowerMessage.includes('resolved')) {
+        return `Great news! ${stats.resolved} complaints have been resolved.`;
+      } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
+        return "Hello! How can I assist you with Nagarsaathi today?";
+      } else {
+        return "I'm experiencing technical difficulties. Please try again later.";
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (inputMessage.trim() === "") return;
+
+    // Add user message
+    const userMessage = {
+      id: messages.length + 1,
+      text: inputMessage,
+      sender: "user",
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputMessage("");
+
+    // Get AI response
+    const botResponseText = await getAIResponse(inputMessage);
+
+    const botResponse = {
+      id: messages.length + 2,
+      text: botResponseText,
+      sender: "bot",
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, botResponse]);
+  };
+
+  const handleQuickQuestion = (question) => {
+    setInputMessage(question);
+    setTimeout(() => {
+      handleSendMessage();
+    }, 100);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSendMessage();
+    }
+  };
+
+  const quickQuestions = [
+    "Total complaints?",
+    "Pending complaints?",
+    "How to update status?",
+    "Export reports?",
+    "Most common issue?"
+  ];
+
+  return (
+    <>
+      {/* Chatbot toggle button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg z-50 flex items-center justify-center hover:bg-blue-700 transition-colors"
+      >
+        {isOpen ? <FiX size={24} /> : <FiMessageSquare size={24} />}
+      </button>
+
+      {/* Chatbot window */}
+      {isOpen && (
+        <div className="fixed bottom-20 right-6 w-80 h-96 bg-white rounded-lg shadow-xl z-50 flex flex-col border border-gray-200">
+          {/* Header */}
+          <div className="bg-blue-600 text-white p-3 rounded-t-lg flex justify-between items-center">
+            <h3 className="font-semibold">Nagarsaathi Assistant</h3>
+            <button onClick={() => setIsOpen(false)} className="text-white">
+              <FiX size={18} />
+            </button>
+          </div>
+
+          {/* Messages container */}
+          <div className="flex-1 overflow-y-auto p-3 bg-gray-50">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`mb-3 ${message.sender === "user" ? "text-right" : ""}`}
+              >
+                <div
+                  className={`inline-block p-2 rounded-lg max-w-xs ${
+                    message.sender === "user"
+                      ? "bg-blue-100 text-blue-900"
+                      : "bg-gray-200 text-gray-800"
+                  }`}
+                >
+                  {message.text}
+                </div>
+                <div
+                  className={`text-xs mt-1 text-gray-500 ${
+                    message.sender === "user" ? "text-right" : ""
+                  }`}
+                >
+                  {message.timestamp.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="text-left mb-3">
+                <div className="inline-block p-2 rounded-lg bg-gray-200 text-gray-800">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce mr-1"></div>
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce mr-1" style={{ animationDelay: "0.2s" }}></div>
+                    <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Quick questions */}
+          <div className="p-2 bg-gray-100 border-t border-gray-200">
+            <div className="text-xs text-gray-500 mb-1">Quick questions:</div>
+            <div className="flex flex-wrap gap-1">
+              {quickQuestions.map((question, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleQuickQuestion(question)}
+                  className="bg-white border border-gray-300 rounded-full px-2 py-1 text-xs text-gray-600 hover:bg-blue-100 transition-colors"
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Input area */}
+          <div className="p-3 border-t border-gray-200 flex">
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your message..."
+              className="flex-1 border border-gray-300 rounded-l-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isLoading}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={inputMessage.trim() === "" || isLoading}
+              className="bg-blue-600 text-white p-2 rounded-r-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors flex items-center justify-center"
+            >
+              <FiSend size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -44,7 +255,9 @@ const AdminDashboard = () => {
   const [filterStatus, setFilterStatus] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterWard, setFilterWard] = useState("");
-
+ const [wardWarning, setWardWarning] = useState("");
+  const [categoryWarning, setCategoryWarning] = useState("");
+  const WARD_THRESHOLD = 5; 
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
@@ -59,7 +272,44 @@ const AdminDashboard = () => {
       navigate("/login");
     }
   }, [navigate]);
+ useEffect(() => {
+    // Compute top ward and category and update warning states after complaints are set
+    if (complaints.length === 0) {
+      setWardWarning("");
+      setCategoryWarning("");
+      return;
+    }
 
+    // Count by ward
+    const wardCount = {};
+    complaints.forEach(c => {
+      const ward = c.user?.ward || c.ward || "Unknown";
+      if (!wardCount[ward]) wardCount[ward] = 0;
+      wardCount[ward]++;
+    });
+
+    const maxWard = Object.entries(wardCount).sort((a, b) => b[1] - a[1])[0];
+    if (maxWard && maxWard[1] > WARD_THRESHOLD) {
+      setWardWarning(`Warning: Ward "${maxWard[0]}" has high complaints (${maxWard[1]}).`);
+    } else {
+      setWardWarning("");
+    }
+
+    // Count by category
+    const categoryCount = {};
+    complaints.forEach(c => {
+      const cat = c.category || "Unknown";
+      if (!categoryCount[cat]) categoryCount[cat] = 0;
+      categoryCount[cat]++;
+    });
+    const maxCat = Object.entries(categoryCount).sort((a, b) => b[1] - a[1])[0];
+    if (maxCat) {
+      setCategoryWarning(`Most complaints are about "${maxCat[0]}" (${maxCat[1]} total).`);
+    } else {
+      setCategoryWarning("");
+    }
+
+  }, [complaints]);
   const fetchComplaints = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -89,6 +339,7 @@ const AdminDashboard = () => {
     }
   };
 
+  // Only deletes on update to "Resolved"
   const handleStatusChange = async (id, newStatus) => {
     try {
       const token = localStorage.getItem("token");
@@ -102,7 +353,19 @@ const AdminDashboard = () => {
       });
 
       if (response.ok) {
-        fetchComplaints();
+        // If resolved, delete the complaint (permanent removal)
+        if (newStatus === "Resolved") {
+          const deleteRes = await fetch(`http://localhost:5000/api/complaints/${id}`, {
+            method: "DELETE",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+            },
+          });
+          if (!deleteRes.ok) {
+            alert("Error deleting resolved complaint.");
+          }
+        }
+        fetchComplaints(); // Refresh after status change or deletion
       }
     } catch (err) {
       alert("Error updating status");
@@ -122,12 +385,15 @@ const AdminDashboard = () => {
       Status: c.status,
       Priority: c.priority,
       Location: c.location,
-      "User Name": c.user.name,
-      "User Ward": c.user.ward,
+      // Gracefully handle both user and public complaints
+      "User Name": c.user?.name || c.submittedBy || "Unknown",
+      "User Ward": c.user?.ward || c.ward || "Unknown",
       "Date Filed": new Date(c.createdAt).toLocaleDateString(),
     }));
 
-    const headers = Object.keys(exportData[0] || {}).join(",");
+    if (exportData.length === 0) return;
+
+    const headers = Object.keys(exportData[0]).join(",");
     const rows = exportData.map((obj) =>
       Object.values(obj)
         .map((val) => (typeof val === "string" && val.includes(",") ? `"${val}"` : val))
@@ -184,27 +450,51 @@ const AdminDashboard = () => {
     }, {})
   ).map(([name, value]) => ({ name, value }));
 
-const filteredComplaints = complaints.filter((c) => {
-  // Safe access to user properties
-  const userName = c.user?.name || '';
-  const userWard = c.user?.ward || '';
-  
-  const matchesSearch =
-    c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    userName.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredComplaints = complaints.filter((c) => {
+    // Support both user and public complaints
+    const userName = c.user?.name || c.submittedBy || '';
+    const userWard = c.user?.ward || c.ward || '';
 
-  const matchesStatus = filterStatus ? c.status === filterStatus : true;
-  const matchesCategory = filterCategory ? c.category === filterCategory : true;
-  const matchesWard = filterWard ? userWard === filterWard : true;
+    const matchesSearch =
+      c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      userName.toLowerCase().includes(searchQuery.toLowerCase());
 
-  return matchesSearch && matchesStatus && matchesCategory && matchesWard;
-});
+    const matchesStatus = filterStatus ? c.status === filterStatus : true;
+    const matchesCategory = filterCategory ? c.category === filterCategory : true;
+    const matchesWard = filterWard ? userWard === filterWard : true;
+
+    return matchesSearch && matchesStatus && matchesCategory && matchesWard;
+  });
 
   if (!user) return <div>Loading...</div>;
 
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* Header */}
+      {(wardWarning || categoryWarning) && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-4 rounded flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <FiAlertTriangle className="text-yellow-600" />
+            <span className="font-semibold text-yellow-800">Attention Required:</span>
+          </div>
+          {wardWarning && (
+            <div className="text-yellow-700">{wardWarning}  
+              <span className="block text-xs text-gray-600">
+                [Tip: Investigate this ward for root causes. Launch awareness campaigns, improve complaint redressal, or organize ward-level meetings.]
+              </span>
+            </div>
+          )}
+
+          {categoryWarning && (
+            <div className="text-yellow-700">{categoryWarning}
+              <span className="block text-xs text-gray-600">
+                [Tip: Analyze root causes in category, allocate more resources, run category-specific workshops, or consult department experts.]
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+      
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
@@ -299,15 +589,15 @@ const filteredComplaints = complaints.filter((c) => {
             <option key={cat}>{cat}</option>
           ))}
         </select>
-            <select className="border p-2 rounded" onChange={(e) => setFilterWard(e.target.value)}>
-      <option value="">All Wards</option>
-      {[...new Set(complaints
-        .map((c) => c.user?.ward || 'No Ward')
-        .filter(ward => ward !== 'No Ward') // Optional: remove "No Ward" if you prefer
-      )].map((ward) => (
-        <option key={ward} value={ward}>{ward}</option>
-      ))}
-    </select>
+        <select className="border p-2 rounded" onChange={(e) => setFilterWard(e.target.value)}>
+          <option value="">All Wards</option>
+          {[...new Set(complaints
+            .map((c) => c.user?.ward || c.ward || 'No Ward')
+            .filter(ward => ward && ward !== 'No Ward')
+          )].map((ward) => (
+            <option key={ward} value={ward}>{ward}</option>
+          ))}
+        </select>
       </div>
 
       {/* Table */}
@@ -324,9 +614,9 @@ const filteredComplaints = complaints.filter((c) => {
             {filteredComplaints.map((c) => (
               <tr key={c._id}>
                 <td className="px-6 py-4 text-sm text-gray-900">
-                {c.user?.name || 'Unknown User'}<br />
-                <span className="text-xs text-gray-500">{c.user?.ward || 'No Ward'}</span>
-              </td>
+                  {c.user?.name || c.submittedBy || 'Unknown User'}<br />
+                  <span className="text-xs text-gray-500">{c.user?.ward || c.ward || 'No Ward'}</span>
+                </td>
                 <td className="px-6 py-4 text-sm">
                   {c.title}<br /><span className="text-xs text-gray-500">{c.description}</span>
                 </td>
@@ -355,6 +645,9 @@ const filteredComplaints = complaints.filter((c) => {
           </tbody>
         </table>
       </div>
+
+      {/* Add the chatbot component */}
+      <AIChatBot stats={stats} categoryData={categoryData} complaints={complaints} />
     </div>
   );
 };

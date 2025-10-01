@@ -8,6 +8,8 @@ const path = require("path");
 const fs = require("fs");
 const multer = require("multer"); // For file upload errors
 const connectDB = require("./config/db");
+// Add this to your server.js file
+const chatbotRoutes = require('./routes/chatbot');
 
 // Load env vars
 dotenv.config({ path: "./.env" });
@@ -56,6 +58,7 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/complaints", complaintRoutes);
 app.use("/api/discussions", discussionRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // Global error handling (including multer errors)
 app.use((error, req, res, next) => {

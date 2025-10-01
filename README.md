@@ -7,17 +7,21 @@
 ### Homepage
 ![Homepage](screenshots/homepage.png)
 
-### Complaints Dashboard
-![Complaints Dashboard](screenshots/complaints.png)
+### Complaints Page
+![Complaints Page](screenshots/complaintsPage.png)
 
-### Main Admin Panel
-![Main Admin](screenshots/mainAdmin.png)
+### Main Admin Dashboard
+![Main Admin Dashboard](screenshots/mainAdminDashboard.png)
 
-### Ward Admin Interface
-![Ward Admin](screenshots/wardAdmin.png)
+### Ward Admin Dashboard
+![Ward Admin Dashboard](screenshots/wardAdminDashboard.png)
 
-### OR Functionality
-![OR Function](screenshots/ORFunction.png)
+### QR Functionality
+![QR Functionality](screenshots/QRFunctionality.png)
+
+### Complaints Excel Sheet
+![Complaints Excel Sheet](screenshots/ComplaintsExcelSheet.png)
+
 ## 📋 Project Description
 
 **NagarTrack** is a smart municipal grievance management platform that empowers citizens to seamlessly report civic issues like garbage, drainage, potholes, and streetlight failures. With real-time status tracking, data analytics, and ward-wise dashboards, it bridges the gap between the public and local authorities—ensuring faster resolution, improved transparency, and a cleaner, more responsive city.
@@ -28,7 +32,5 @@
 - **Real-time Status Tracking** 
 - **Ward-wise Analytics**
 - **Admin Dashboard**
-- **Integrated QR functionality**
-- **AI Chatbot**
-
-
+- **QR Code Functionality**
+- **Excel Export Capabilities**

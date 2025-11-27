@@ -17,8 +17,7 @@
 
 ## 📖 Introduction
 
-**NagarSaathi** is a digital solution to help citizens report municipal issues easily.  
-Admins can track complaints and respond with clear dashboards, status tracking, and data insights.
+**NagarSaathi** is a smart municipal grievance management platform that empowers citizens to seamlessly report civic issues like garbage, drainage, potholes, and streetlight failures. With real-time status tracking, data analytics, and ward-wise dashboards, it bridges the gap between the public and local authorities—ensuring faster resolution, improved transparency, and a cleaner, more responsive city.
 
 ### 🎯 Project Overview
 

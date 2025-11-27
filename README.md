@@ -1,35 +1,37 @@
-# NagarSaathi
-> Smart Municipal Grievance Management Platform
-> ## 📋 Project Description
+# 🏙️ NagarSaathi – Smart Municipal Grievance Management Platform
 
-**NagarSaathi** is a smart municipal grievance management platform that empowers citizens to seamlessly report civic issues like garbage, drainage, potholes, and streetlight failures. With real-time status tracking, data analytics, and ward-wise dashboards, it bridges the gap between the public and local authorities—ensuring faster resolution, improved transparency, and a cleaner, more responsive city.
+<div align="center">
 
-## 🚀 Features
+![NagarSaathi](https://img.shields.io/badge/NagarSaathi-Smart%20City-blue?style=for-the-badge&logo=google-maps)
+![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
+![Node.js](https://img.shields.io/badge/Node.js-18-green?style=for-the-badge&logo=nodedotjs)
+![MongoDB](https://img.shields.io/badge/MongoDB-8.15-green?style=for-the-badge&logo=mongodb)
 
-- **Citizen Issue Reporting**
-- **Real-time Status Tracking** 
-- **Ward-wise Analytics**
-- **Admin Dashboard**
-- **QR Code Functionality**
-- **Excel Export Capabilities**
+**A Smart Municipal Grievance Reporting & Management System**
 
-## 📸 Project Screenshots
+</div>
 
-### Homepage
-![Homepage](screenshots/homepage.png)
+## 📖 Introduction
 
-### Complaints Page
-![Complaints Page](screenshots/complaintsPage.png)
+**NagarSaathi** is a web-based platform that enables citizens to report civic issues easily.  
+Admins can track issue resolution with a detailed dashboard including analytics, ward management, QR support, and report exports.
 
-### Main Admin Dashboard
-![Main Admin Dashboard](screenshots/mainAdminDashboard.png)
+### 🎯 Project Overview
 
-### Ward Admin Dashboard
-![Ward Admin Dashboard](screenshots/wardAdminDashboard.png)
+- Citizen complaint registration  
+- Real-time complaint tracking  
+- Ward-wise admin dashboard  
+- Analytics and insights  
+- QR-based complaint scanning  
+- Excel export for data reporting  
 
-### QR Functionality
-![QR Functionality](screenshots/QRFunctionality.png)
+## 🏗️ System Architecture
 
-### Complaints Excel Sheet
-![Complaints Excel Sheet](screenshots/ComplaintsExcelSheet.png)
-
+```mermaid
+graph TD
+    C[👥 Citizen] -->|Submit Complaints| F[⚛️ React Frontend]
+    F -->|REST API| B[🟢 Node.js Backend]
+    B -->|Database| D[(🗄️ MongoDB Atlas)]
+    B -->|QR Generation & Scan| Q[🔳 QR Service]
+    B -->|Excel Export| X[📊 Export Service]
+    A[🏛️ Admin] -->|Dashboards| F

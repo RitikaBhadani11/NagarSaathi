@@ -28,7 +28,7 @@ const Navbar = () => {
     navigate("/login")
   }
 
-  // If no user is logged in, don't show the navbar (they should be on login/signup page)
+  // If no user is logged in, don't show the navbar
   if (!user) {
     return null
   }
@@ -191,4 +191,3 @@ const Navbar = () => {
 }
 
 export default Navbar
-

@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
@@ -94,9 +96,9 @@ const LocationPicker = ({ onLocationSelect, initialLocation = null }) => {
     });
   };
 
-  // Search locations
+  // Search locations - FIXED: Removed <form> tag
   const handleSearch = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (!searchQuery.trim()) return;
     
     setLoading(true);
@@ -164,20 +166,30 @@ const LocationPicker = ({ onLocationSelect, initialLocation = null }) => {
     }
   };
 
+  // Handle Enter key press
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
+  };
+
   return (
     <div className="space-y-4">
-      {/* Search Bar */}
+      {/* Search Bar - WITHOUT form tag */}
       <div className="space-y-2">
-        <form onSubmit={handleSearch} className="flex gap-2">
+        <div className="flex gap-2">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={handleKeyPress}
             placeholder="Search location (street, city, landmark)..."
             className="flex-1 border px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
           <button
-            type="submit"
+            type="button"
+            onClick={handleSearch}
             disabled={loading}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
           >
@@ -191,7 +203,7 @@ const LocationPicker = ({ onLocationSelect, initialLocation = null }) => {
           >
             📍
           </button>
-        </form>
+        </div>
 
         {/* Search Results */}
         {searchResults.length > 0 && (

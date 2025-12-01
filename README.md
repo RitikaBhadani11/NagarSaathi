@@ -1,36 +1,64 @@
-# NagarSaathi
+# 🏙 NagarSaathi – Smart Municipal Grievance Management Platform
 
-> Smart Municipal Grievance Management Platform
+<div align="center">
 
-## 📸 Project Screenshots
+![NagarSaathi](https://img.shields.io/badge/NagarSaathi-Smart%20City-blue?style=for-the-badge&logo=google-maps)
+![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
+![Node.js](https://img.shields.io/badge/Node.js-18-green?style=for-the-badge&logo=nodedotjs)
+![MongoDB](https://img.shields.io/badge/MongoDB-8.15-green?style=for-the-badge&logo=mongodb)
+![Leaflet](https://img.shields.io/badge/Leaflet-Maps-green?style=for-the-badge&logo=leaflet)
 
-### Homepage
-![Homepage](screenshots/homepage.png)
+*A Smart Municipal Grievance Reporting & Management System*
 
-### Complaints Page
-![Complaints Page](screenshots/complaintsPage.png)
+[![Watch Live Demo Video](https://img.shields.io/badge/🎥_Watch_Live_Demo_Video-Click_Here-red?style=for-the-badge&logo=youtube)](https://drive.google.com/file/d/1g1aDnnvyBX3PHfez8ACSlev84zbkJJWH/view?usp=sharing)
 
-### Main Admin Dashboard
-![Main Admin Dashboard](screenshots/mainAdminDashboard.png)
+</div>
 
-### Ward Admin Dashboard
-![Ward Admin Dashboard](screenshots/wardAdminDashboard.png)
+---
 
-### QR Functionality
-![QR Functionality](screenshots/QRFunctionality.png)
+## 📖 Introduction
 
-### Complaints Excel Sheet
-![Complaints Excel Sheet](screenshots/ComplaintsExcelSheet.png)
+**NagarSaathi** (नगरसाथी - "City Companion") is a digital platform that enables citizens to report municipal issues easily while local authorities track and resolve complaints through dashboards and analytics. It bridges the communication gap between citizens and municipal corporations for faster grievance resolution.
 
-## 📋 Project Description
+### 🎯 Core Objectives
+- **Empower Citizens**: Easy-to-use platform for reporting civic issues
+- **Increase Transparency**: Real-time tracking of complaint status
+- **Improve Efficiency**: Streamlined workflow for municipal authorities
+- **Data-Driven Decisions**: Analytics for better urban management
+- **Accountability**: QR-based tracking and reference system
+- **Geospatial Intelligence**: Map-based visualization for better insights
 
-**NagarTrack** is a smart municipal grievance management platform that empowers citizens to seamlessly report civic issues like garbage, drainage, potholes, and streetlight failures. With real-time status tracking, data analytics, and ward-wise dashboards, it bridges the gap between the public and local authorities—ensuring faster resolution, improved transparency, and a cleaner, more responsive city.
+---
 
-## 🚀 Features
+## 🏗 System Architecture
 
-- **Citizen Issue Reporting**
-- **Real-time Status Tracking** 
-- **Ward-wise Analytics**
-- **Admin Dashboard**
-- **QR Code Functionality**
-- **Excel Export Capabilities**
+```mermaid
+graph TD
+    C[👥 Citizen] -->|Submit Complaints| F[⚛ React Frontend]
+    F -->|REST API| B[🟢 Node.js Backend]
+    B -->|Database Operations| D[(🗄 MongoDB Atlas)]
+    B -->|QR Generation| Q[🔳 QR Services]
+    B -->|Report Generation| X[📊 Excel Export]
+    B -->|Map Data & Geocoding| M[🗺 Leaflet Maps API]
+    A[🏛 Admin] -->|Manage Complaints| F
+    F -->|Interactive Maps| M
+    M -->|Tile Server| T[🌍 OpenStreetMap]
+    M -->|Geolocation| G[📍 Browser Geolocation]
+    
+    subgraph "Mapping Features"
+        M1[📍 Location Picker]
+        M2[🗺️ Complaint Visualization]
+        M3[🔥 Heat Maps]
+        M4[📌 Marker Clustering]
+        M5[🏘️ Ward Boundaries]
+    end
+    
+    F --> M1
+    F --> M2
+    F --> M3
+    F --> M4
+    F --> M5
+    
+    style M fill:#7ac943
+    style F fill:#61dafb
+    style B fill:#68a063

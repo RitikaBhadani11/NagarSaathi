@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Navbar from './Navbar';
+import Navbar from "../../components/Navbar";
 import { FaUser, FaPaperPlane, FaThumbsUp, FaComment, FaTrash, FaGlobe } from 'react-icons/fa';
 
 const DiscussionForum = () => {

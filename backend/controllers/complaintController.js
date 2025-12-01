@@ -27,48 +27,72 @@ const upload = multer({
   },
 });
 
-// @desc    Create new complaint
+// @desc    Create new complaint (for logged-in users)
 // @route   POST /api/complaints
 // @access  Private
-exports.uploadImage = upload.single("image");
 exports.createComplaint = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
     }
 
-    const { title, description, category, location, priority } = req.body;
-
+    const { 
+      title, 
+      description, 
+      category, 
+      location, 
+      priority, 
+      coordinates, 
+      formattedAddress 
+    } = req.body;
+    
     const complaintData = {
       title,
       description,
       category,
       location,
       priority: priority || "Medium",
+      ward: req.user.ward,
       user: req.user.id,
-      ward: req.user.ward, // ✅ Automatically assign ward from user
+      status: "Pending",
+      isPublic: false,
     };
 
-    // Add image path if file was uploaded
+    // ✅ Save coordinates if provided
+    if (coordinates) {
+      try {
+        const coords = JSON.parse(coordinates);
+        complaintData.coordinates = coords;
+        complaintData.formattedAddress = formattedAddress || location;
+      } catch (err) {
+        console.log("Invalid coordinates format:", err.message);
+      }
+    }
+
+    // Handle image
     if (req.file) {
-      complaintData.image = req.file.path;
+      complaintData.image = `/uploads/complaints/${req.file.filename}`;
     }
 
     const complaint = await Complaint.create(complaintData);
-    await complaint.populate("user", "name email ward");
-
+    
     res.status(201).json({
       success: true,
       complaint,
     });
   } catch (error) {
+    console.error("Create complaint error:", error);
     res.status(500).json({
       success: false,
       error: error.message,
     });
   }
 };
+
 // @desc    Create public complaint (no auth required)
 // @route   POST /api/complaints/public
 // @access  Public
@@ -76,42 +100,66 @@ exports.createPublicComplaint = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
     }
 
-    const { title, description, category, location, priority, name, ward, email, phone } = req.body;
-
+    const { 
+      title, 
+      description, 
+      category, 
+      location, 
+      name, 
+      ward,
+      email, 
+      phone,
+      coordinates, 
+      formattedAddress 
+    } = req.body;
+    
     const complaintData = {
       title,
       description,
       category,
       location,
       ward,
-      priority: priority || "Medium",
+      status: "Pending",
+      priority: "Medium",
       isPublic: true,
       submittedBy: name,
       publicEmail: email || "",
       publicPhone: phone || "",
-      status: "Pending"
     };
 
-    const complaint = await Complaint.create(complaintData);
+    // ✅ Save coordinates if provided
+    if (coordinates) {
+      try {
+        const coords = JSON.parse(coordinates);
+        complaintData.coordinates = coords;
+        complaintData.formattedAddress = formattedAddress || location;
+      } catch (err) {
+        console.log("Invalid coordinates format:", err.message);
+      }
+    }
 
+    // Handle image for public complaints
+    if (req.file) {
+      complaintData.image = `/uploads/complaints/${req.file.filename}`;
+    }
+
+    const complaint = await Complaint.create(complaintData);
+    
     res.status(201).json({
       success: true,
-      message: "Complaint submitted successfully!",
-      complaint: {
-        _id: complaint._id,
-        title: complaint.title,
-        status: complaint.status,
-        referenceId: complaint._id // For user reference
-      }
+      complaint,
     });
   } catch (error) {
-    console.error("Public complaint error:", error);
+    console.error("Create public complaint error:", error);
     res.status(500).json({
       success: false,
-      error: "Server error: " + error.message
+      error: error.message,
     });
   }
 };
@@ -177,7 +225,6 @@ exports.deleteComplaint = async (req, res) => {
 // @desc    Get all complaints (Admin only)
 // @route   GET /api/complaints
 // @access  Private/Admin
-// In complaintController.js
 exports.getAllComplaints = async (req, res) => {
   try {
     console.log("Fetching all complaints with user population...");
@@ -235,10 +282,6 @@ exports.updateComplaintStatus = async (req, res) => {
   }
 };
 
-
-// @desc    Get complaints by ward number
-// @route   GET /api/complaints/ward/:wardNumber
-// @access  Private
 // @desc    Get complaints by ward number
 // @route   GET /api/complaints/ward/:wardNumber
 // @access  Private
@@ -271,5 +314,5 @@ exports.getComplaintsByWard = async (req, res) => {
   }
 };
 
-// Export multer upload middleware
+// Export multer upload middleware (for both routes)
 exports.uploadImage = upload.single("image");

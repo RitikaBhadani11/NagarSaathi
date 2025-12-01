@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import Feedback from './pages/user/Feedback';

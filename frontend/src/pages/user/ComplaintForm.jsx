@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import Navbar from "../../components/Navbar"
+import LocationPicker from "../../components/LocationPicker" // Add this import
 
 const ComplaintForm = () => {
   const [user, setUser] = useState(null)
@@ -14,6 +15,8 @@ const ComplaintForm = () => {
     location: "",
     priority: "Medium",
     image: null,
+    coordinates: null,      // New field
+    formattedAddress: "",   // New field
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -63,6 +66,18 @@ const ComplaintForm = () => {
     setError("")
   }
 
+ // In ComplaintForm.jsx, replace the handleLocationSelect function:
+const handleLocationSelect = (locationData) => {
+  console.log("Location data received:", locationData); // DEBUG
+  
+  setFormData({
+    ...formData,
+    location: locationData.address,  // Make sure this is the actual address
+    coordinates: locationData.coordinates,
+    formattedAddress: locationData.address
+  })
+}
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -77,6 +92,12 @@ const ComplaintForm = () => {
       submitData.append("description", formData.description)
       submitData.append("location", formData.location)
       submitData.append("priority", formData.priority)
+      
+      // Add coordinates if available
+      if (formData.coordinates) {
+        submitData.append("coordinates", JSON.stringify(formData.coordinates))
+        submitData.append("formattedAddress", formData.formattedAddress)
+      }
 
       if (formData.image) {
         submitData.append("image", formData.image)
@@ -165,17 +186,28 @@ const ComplaintForm = () => {
               </select>
             </div>
 
+            {/* ✅ UPDATED LOCATION SECTION WITH MAP */}
             <div>
-              <label className="block text-gray-700 font-semibold mb-1">Location</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="Specific location of the issue"
-                required
-                className="w-full border px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              />
+              <label className="block text-gray-700 font-semibold mb-1">
+                Location
+                <span className="text-red-500 ml-1">*</span>
+              </label>
+              <LocationPicker onLocationSelect={handleLocationSelect} />
+              
+              {formData.location && (
+                <div className="mt-2">
+                  <div className="text-sm text-gray-600 mb-1">Selected Address:</div>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    placeholder="Location will appear here after selection"
+                    required
+                    className="w-full border px-4 py-2 rounded-xl bg-gray-50"
+                  />
+                </div>
+              )}
             </div>
 
             <div>

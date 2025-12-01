@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const complaintSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -23,6 +24,15 @@ const complaintSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide location"],
   },
+  // ✅ ADD THESE
+  coordinates: {
+    lat: Number,
+    lng: Number
+  },
+  formattedAddress: {
+    type: String,
+    default: ""
+  },
   status: {
     type: String,
     enum: ["Pending", "In Progress", "Resolved", "Rejected"],
@@ -39,27 +49,23 @@ const complaintSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    // Remove required: true for public complaints
   },
-  
-  // ✅ ADD THESE FIELDS FOR PUBLIC COMPLAINTS
   isPublic: {
     type: Boolean,
     default: false
   },
   submittedBy: {
-    type: String, // Store name for public submissions
+    type: String,
     default: ""
   },
   publicEmail: {
-    type: String, // Optional: store email for public submissions
+    type: String,
     default: ""
   },
   publicPhone: {
-    type: String, // Optional: store phone for public submissions
+    type: String,
     default: ""
   },
-  
   createdAt: {
     type: Date,
     default: Date.now,
@@ -67,6 +73,6 @@ const complaintSchema = new mongoose.Schema({
   resolvedAt: {
     type: Date,
   },
-})
+});
 
-module.exports = mongoose.model("Complaint", complaintSchema)
+module.exports = mongoose.model("Complaint", complaintSchema);
